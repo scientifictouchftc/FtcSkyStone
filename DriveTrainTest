@@ -1,0 +1,84 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+
+
+@TeleOp(name = "FinalTeleOBJ")
+public class FinalTeleOBJ extends LinearOpMode {
+    public float x, y, z, w, pwr;
+    private DcMotor BR;
+    private DcMotor BL;
+    private DcMotor FL;
+    private DcMotor FR;
+
+
+
+
+    @Override
+    public void runOpMode ()  throws InterruptedException
+    {
+        BR = hardwareMap.dcMotor.get("BR");
+        BL = hardwareMap.dcMotor.get("BL");
+        FL = hardwareMap.dcMotor.get("FL");
+        FR = hardwareMap.dcMotor.get("FR");
+
+
+        FL.setDirection(DcMotor.Direction.REVERSE);
+        BL.setDirection(DcMotor.Direction.REVERSE);
+
+
+        FR.setPower(Range.clip(pwr - x+z, -1, 1));
+        BL.setPower(Range.clip(pwr - x-z, -1, 1));
+        FL.setPower(Range.clip(pwr + x-z, -1, 1));
+        BR.setPower(Range.clip(pwr + x+z, -1, 1));
+
+
+        waitForStart();
+        while (opModeIsActive()) {
+
+            FL.setPower(-gamepad1.left_stick_y);
+            FR.setPower(-gamepad1.right_stick_y);
+            BL.setPower(-gamepad1.left_stick_y);
+            BR.setPower(-gamepad1.right_stick_y);
+
+
+//            FL.setPower(-gamepad1.left_stick_x);
+//            FR.setPower(gamepad1.right_stick_x);
+//            BL.setPower(gamepad1.right_stick_x);
+//            BR.setPower(-gamepad1.left_stick_x);
+            if(gamepad1.dpad_left){
+                FL.setPower(-1);
+                FR.setPower(1);
+                BL.setPower(1);
+                BR.setPower(-1);
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+        idle();
+    }
+}
