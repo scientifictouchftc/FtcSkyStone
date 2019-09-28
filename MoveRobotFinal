@@ -162,6 +162,9 @@ public class Moverobot {
 
         // Determine new target position, and pass to motor controller
 
+
+
+
         newLeftFrontTarget = FL.getCurrentPosition() + (int) (ninetyleft * COUNTS_PER_INCH);
         newRightFrontTarget = FR.getCurrentPosition() + (int) (ninetyright * COUNTS_PER_INCH);
         newLeftBackTarget = BL.getCurrentPosition() + (int) (ninetyleft * COUNTS_PER_INCH);
@@ -172,6 +175,11 @@ public class Moverobot {
         FL.setTargetPosition(newLeftFrontTarget);
         BR.setTargetPosition(newRightBackTarget);
         BL.setTargetPosition(newLeftBackTarget);
+
+        FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         resetEncoders();
         SetRunToPosition();
@@ -186,9 +194,7 @@ public class Moverobot {
         // always end the motion as soon as possible.
         // However, if you require that BOTH motors have finished their moves before the robot continues
         // onto the next step, use (isBusy() || isBusy()) in the loop test.
-        while (op.opModeIsActive() &&
-                (runtime.seconds() < 31.0) &&
-                (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
 
             // Display it for the driver.
             this.telemetry.addData("Path1", "Running to %7d :%7d", newLeftFrontTarget, newRightFrontTarget);
@@ -199,7 +205,6 @@ public class Moverobot {
             // FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             this.telemetry.update();
-        }
 
 
         // Stop all motion;
@@ -597,6 +602,12 @@ public class Moverobot {
         BR.setTargetPosition(newRightBackTarget);
         BL.setTargetPosition(newLeftBackTarget);
 
+        // Turn On RUN_TO_POSITION
+        FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         resetEncoders();
         SetRunToPosition();
         // reset the timeout time and start motion.
@@ -679,12 +690,16 @@ public class Moverobot {
         BR.setTargetPosition(newRightBackTarget);
         BL.setTargetPosition(newLeftBackTarget);
 
-        resetEncoders();
-        SetRunToPosition();
+        // Turn On RUN_TO_POSITION
+        FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       // resetEncoders();
+
         // reset the timeout time and start motion.
         runtime.reset();
         setPowerAll(Math.abs(speed), Math.abs(speed), Math.abs(speed), Math.abs(speed));
-
 
         // keep looping while we are still active, and there is time left, and both motors are running.
         // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -696,6 +711,7 @@ public class Moverobot {
                 (runtime.seconds() < 31.0) &&
                 (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
 
+            //SetRunToPosition();
             // Display it for the driver.
             this.telemetry.addData("Path1", "Running to %7d :%7d", newLeftFrontTarget, newRightFrontTarget);
             this.telemetry.addData("Path2", "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
@@ -806,7 +822,95 @@ public class Moverobot {
 
 
 
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS)
+    {
 
+        int newLeftFrontTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+        int newRightBackTarget;
+
+        // Ensure that the opmode is still active
+        //if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+
+            newLeftFrontTarget = FL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightFrontTarget = FR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftBackTarget = BL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = BR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+
+            FR.setTargetPosition(newRightFrontTarget);
+            FL.setTargetPosition(newLeftFrontTarget);
+            BR.setTargetPosition(newRightBackTarget);
+            BL.setTargetPosition(newLeftBackTarget);
+
+
+            // Turn On RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+          /* runtime.reset();
+           BL.setPower(Math.abs(speedleft));
+           BR.setPower(Math.abs(speedright));
+           FL.setPower(Math.abs(speedleft));
+           FR.setPower(Math.abs(speedright));*/
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            FR.setPower(Math.abs(speed));
+            FL.setPower(Math.abs(speed));
+            BR.setPower(Math.abs(speed));
+            BL.setPower(Math.abs(speed));
+
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (op.opModeIsActive() &&
+                    (runtime.seconds() < 31.0) &&
+                    (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftFrontTarget,  newRightFrontTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
+
+
+
+
+                telemetry.update();
+
+
+
+
+
+            }
+
+            // Stop all motion;
+            FR.setPower(0);
+            FL.setPower(0);
+            BR.setPower(0);
+            BL.setPower(0);
+
+
+
+            // Turn off RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        //}
+    }
 
 
 
