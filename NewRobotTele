@@ -1,0 +1,219 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+
+@TeleOp(name = "NewRobotTele")
+public class NewRobotTele extends LinearOpMode {
+    private float x, y, z, w, pwr;
+    private DcMotor BR;
+    private DcMotor BL;
+    private DcMotor FL;
+    private DcMotor FR;
+    //private Servo FoundationServo;
+    private DcMotor linearslide;
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double     TICKS_PER_REV    = 1120 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1  ;     // This is < 1.0 if geared UP
+    static final double     SPOOL_DIAMETER_INCHES   = 1.0 ;     // For figuring circumference
+    static final double              COUNTS_PER_INCH         = (TICKS_PER_REV * DRIVE_GEAR_REDUCTION) /
+            (SPOOL_DIAMETER_INCHES * 3.1415);
+
+
+
+    @Override
+    public void runOpMode ()  throws InterruptedException
+    {
+        BR = hardwareMap.dcMotor.get("BR");
+        BL = hardwareMap.dcMotor.get("BL");
+        FL = hardwareMap.dcMotor.get("FL");
+        FR = hardwareMap.dcMotor.get("FR");
+        linearslide = hardwareMap.dcMotor.get("linearslide");
+        //FoundationServo = hardwareMap.servo.get("TestServo");
+
+
+
+        FL.setDirection(DcMotor.Direction.REVERSE);
+        BL.setDirection(DcMotor.Direction.REVERSE);
+
+
+        FR.setPower(Range.clip(pwr - x+z, -1, 1));
+        BL.setPower(Range.clip(pwr - x-z, -1, 1));
+        FL.setPower(Range.clip(pwr + x-z, -1, 1));
+        BR.setPower(Range.clip(pwr + x+z, -1, 1));
+
+
+        waitForStart();
+        while (opModeIsActive()) {
+
+            double  slowerspeed = 0.5;
+
+
+
+            //***SLOW SPEED MODE****
+            if (gamepad1.a) {
+                FL.setPower(slowerspeed * gamepad1.left_stick_y);
+                FR.setPower(slowerspeed * gamepad1.left_stick_y);
+                BL.setPower(slowerspeed * gamepad1.left_stick_y);
+                BR.setPower(slowerspeed * gamepad1.left_stick_y);
+// strafing
+                FL.setPower( slowerspeed * -gamepad1.left_stick_x);
+                FR.setPower(slowerspeed * gamepad1.left_stick_x);
+                BL.setPower(slowerspeed * gamepad1.left_stick_x);
+                BR.setPower(slowerspeed * -gamepad1.left_stick_x);
+//turning on the right joystick
+                FL.setPower(slowerspeed * -gamepad1.right_stick_x);
+                FR.setPower(slowerspeed * gamepad1.right_stick_x);
+                BL.setPower(slowerspeed * -gamepad1.right_stick_x);
+                BR.setPower(slowerspeed * gamepad1.right_stick_x);
+
+            }
+        }
+
+
+        if(gamepad1.dpad_up) {
+            linearslidedrive(.5,5);
+        }
+
+        if(gamepad1.dpad_down) {
+            linearslidedrive(.5,5);
+        }
+
+
+//            if(gamepad1.left_bumper) {
+//
+//            }
+
+        //Servo Tings
+        //if(gamepad1.y){
+        //  FoundationServo.setPosition(1);
+        // }
+        // if(gamepad1.x){
+        //   FoundationServo.setPosition(0);
+        //}
+
+
+        linearslide.setPower(gamepad2.left_stick_y);
+
+        //Forward and backwards
+        FL.setPower(gamepad1.left_stick_y);
+        FR.setPower(gamepad1.left_stick_y);
+        BL.setPower(gamepad1.left_stick_y);
+        BR.setPower(gamepad1.left_stick_y);
+        //Left Strafe
+        FL.setPower(-gamepad1.left_stick_x);
+        FR.setPower(gamepad1.left_stick_x);
+        BL.setPower(gamepad1.left_stick_x);
+        BR.setPower(-gamepad1.left_stick_x);
+        //Right Strafe
+        FL.setPower(-gamepad1.right_stick_x);
+        FR.setPower(gamepad1.right_stick_x);
+        BL.setPower(-gamepad1.right_stick_x);
+        BR.setPower(gamepad1.right_stick_x);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    private void linearslidedrive(double speed, double inches )
+    {
+
+        int slidedistance;
+
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+
+            slidedistance = linearslide.getCurrentPosition() + (int)(inches* COUNTS_PER_INCH);
+
+
+
+            linearslide.setTargetPosition(slidedistance);
+
+
+
+            // Turn On RUN_TO_POSITION
+            linearslide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            linearslide.setPower(Math.abs(speed ));
+
+
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 10) &&
+                    (linearslide.isBusy() )) {
+
+                // Display it for the driver.
+                //  telemetry.addData("Path1",  "Running to %7d :%7d", PulleyDistance);
+                //telemetry.addData("Path2",  "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
+
+
+                // FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                // FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+                telemetry.update();
+
+
+
+
+
+            }
+
+            // Stop all motion;
+            linearslide.setPower(0);
+
+
+
+            // Turn off RUN_TO_POSITION
+            linearslide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //************************************************ENDING BRACE************************************************************************
+}
