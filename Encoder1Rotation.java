@@ -100,6 +100,8 @@ public class Encoder1Rotation extends LinearOpMode {
 
     }
 
+    
+    
     public void setRunToPosition () {
         // Turn ON RUN_TO_POSITION
 
