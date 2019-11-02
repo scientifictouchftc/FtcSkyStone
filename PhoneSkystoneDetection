@@ -1,4 +1,3 @@
-
 /* Copyright (c) 2019 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -88,8 +87,8 @@ import java.util.Locale;
  */
 
 
-@TeleOp(name="SKYSTONEDetect", group ="Concept")
-public class VuforiaTest extends LinearOpMode {
+@TeleOp(name="WebcamSkystoneDetectionVuforia", group ="Concept")
+public class WebcamSkystoneDetectionVuforia extends LinearOpMode {
 
     // IMPORTANT:  For Phone Camera, set 1) the camera source and 2) the orientation, based on how your phone is mounted:
     // 1) Camera Source.  Valid choices are:  BACK (behind screen) or FRONT (selfie side)
@@ -133,6 +132,9 @@ public class VuforiaTest extends LinearOpMode {
     private static final float halfField = 72 * mmPerInch;
     private static final float quadField  = 36 * mmPerInch;
 
+    WebcamName webcamName = null;
+
+
     // Class Members
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia = null;
@@ -150,10 +152,16 @@ public class VuforiaTest extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
+        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
+
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
+
+        parameters.cameraName = webcamName;
+
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -353,18 +361,18 @@ public class VuforiaTest extends LinearOpMode {
                 VectorF translation = lastLocation.getTranslation();
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-                   double xPosition = translation.get(0);
-                   double yPosition = translation.get(1);
-                   double zPosition = translation.get(2);
-                   double distance = Math.hypot(xPosition,yPosition);
-                   
+                double xPosition = translation.get(0);
+                double yPosition = translation.get(1);
+                double zPosition = translation.get(2);
+                double distance = Math.hypot(xPosition,yPosition);
 
-                   if(xPosition < -10){
-                       PositionKeystone="left";
-                   }
-                   else{
-                       PositionKeystone="center";
-                   }
+
+                if(xPosition < -10){
+                    PositionKeystone="left";
+                }
+                else{
+                    PositionKeystone="center";
+                }
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
