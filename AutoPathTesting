@@ -43,43 +43,59 @@ public class AutoPathTesting extends LinearOpMode {
 
 
 
-        FL.setDirection(DcMotor.Direction.REVERSE);
-        BL.setDirection(DcMotor.Direction.REVERSE);
-        
-        
+        FR.setDirection(DcMotor.Direction.REVERSE);
+        BR.setDirection(DcMotor.Direction.REVERSE);
+
+
         SkystoneDetector detector = new SkystoneDetector();
         String SkystonePos ="";
-        SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
-        telemetry.addData("Main Program - Position",SkystonePos );
+        //  SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
+        //  telemetry.addData("Main Program - Position",SkystonePos );
         telemetry.addLine("Ready To Start");
         telemetry.update();
-        waitForStart(); 
+        waitForStart();
+
+        encoderDrive(.2,12,12,30);
+        strafeDrive(.1,40,-40,30);
+        strafeDrive(.1,-40,40,30);
+        strafeDrive(.1,40,-40,30);
+
+        //encoderDrive(.2,-8,-8,30);
+
+
+        SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
+        telemetry.addData("Main Program - Position",SkystonePos );
+        telemetry.update();
+
+        //sleep(5000);
+        //encoderDrive(.2,10,10,30);
+        //strafeDrive(.1,30,-30,30);
+
+        //encoderDrive(.2,12,12,30);
+        //  strafeDrive(.1,60,-60,30);
+        //encoderDrive(.2,15,15,30);
+        //strafeDrive(.1,-50,50,30);
 
         if ( SkystonePos.equals("left")){
-            
+            encoderDrive(.5,12,12,30);
+            encoderDrive(.5,-12,-12,30);
+            encoderDrive(.5,12,12,30);
+            encoderDrive(.5,-12,-12,30);
+
+            //sleep(0250);
+
+            //strafeDrive(.1,8,-8,30);
+            //sleep(0250);
+            //encoderDrive(.5,-24,24,30);
+
+
+
+
         } else if (SkystonePos.equals("middle")){
-            
+
         } else {
-            
+
         }
-        
-
-        // strafeDrive(.25,20,-20,30);
-        // sleep(5000);
-/*
-        encoderDrive(.25,48,48,30);
-        sleep(2000);
-        strafeDrive(.25,20,-20,30);
-        sleep(2000);
-
-        encoderDrive(.25,-48,-48,30);
-        sleep(2000);
-        encoderDrive(.25,48,48,30);
-*/
-    
-
-
-
 
 
     }
@@ -100,10 +116,10 @@ public class AutoPathTesting extends LinearOpMode {
                              double timeoutS)
     {
 
-        int newLeftFrontTarget;
-        int newRightFrontTarget;
-        int newLeftBackTarget;
-        int newRightBackTarget;
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget= 0;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
@@ -193,10 +209,12 @@ public class AutoPathTesting extends LinearOpMode {
                             double timeoutS)
     {
 
-        int newLeftFrontTarget;
-        int newRightFrontTarget;
-        int newLeftBackTarget;
-        int newRightBackTarget;
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget = 0;
+
+
 
         // Ensure that the opmode is still active
         //if (opModeIsActive()) {
