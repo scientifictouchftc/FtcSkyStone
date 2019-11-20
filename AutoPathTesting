@@ -47,8 +47,8 @@ public class AutoPathTesting extends LinearOpMode {
         BR.setDirection(DcMotor.Direction.REVERSE);
 
 
-        SkystoneDetector detector = new SkystoneDetector();
-        String SkystonePos ="";
+        //SkystoneDetector detector = new SkystoneDetector();
+        // String SkystonePos ="";
         //  SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
         //  telemetry.addData("Main Program - Position",SkystonePos );
         telemetry.addLine("Ready To Start");
@@ -56,13 +56,15 @@ public class AutoPathTesting extends LinearOpMode {
         waitForStart();
 
         encoderDrive(.2,12,12,30);
-        strafeDrive(.1,40,-40,30);
-        strafeDrive(.1,-40,40,30);
-        strafeDrive(.1,40,-40,30);
+        strafeDrive(.1,30,-30,30);
+        encoderDrive(.2,-12,-12,30);
+        strafeDrive(.1,-30,30,30);
+        encoderDrive(.2,-12,-12,30);
+        strafeDrive(.1,30,-30,30);
 
         //encoderDrive(.2,-8,-8,30);
 
-
+        /*
         SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
         telemetry.addData("Main Program - Position",SkystonePos );
         telemetry.update();
@@ -72,17 +74,17 @@ public class AutoPathTesting extends LinearOpMode {
         //strafeDrive(.1,30,-30,30);
 
         //encoderDrive(.2,12,12,30);
-        //  strafeDrive(.1,60,-60,30);
+      //  strafeDrive(.1,60,-60,30);
         //encoderDrive(.2,15,15,30);
         //strafeDrive(.1,-50,50,30);
 
         if ( SkystonePos.equals("left")){
-            encoderDrive(.5,12,12,30);
+           encoderDrive(.5,12,12,30);
             encoderDrive(.5,-12,-12,30);
-            encoderDrive(.5,12,12,30);
+             encoderDrive(.5,12,12,30);
             encoderDrive(.5,-12,-12,30);
 
-            //sleep(0250);
+           //sleep(0250);
 
             //strafeDrive(.1,8,-8,30);
             //sleep(0250);
@@ -96,7 +98,7 @@ public class AutoPathTesting extends LinearOpMode {
         } else {
 
         }
-
+*/
 
     }
 
@@ -198,6 +200,11 @@ public class AutoPathTesting extends LinearOpMode {
             BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
+            FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             //  sleep(250);   // optional pause after each move
         }
     }
@@ -293,6 +300,11 @@ public class AutoPathTesting extends LinearOpMode {
         BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //  sleep(250);   // optional pause after each move
         //}
     }
