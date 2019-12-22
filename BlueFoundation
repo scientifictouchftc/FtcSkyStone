@@ -11,14 +11,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "BlueQuarry")
-public class BlueQuarry extends LinearOpMode {
+@Autonomous(name = "BlueFoundation")
+public class BlueFoundation extends LinearOpMode {
     private DcMotor FR = null;
     private DcMotor FL = null;
     private DcMotor BR = null;
     private DcMotor BL = null;
     private Servo StoneL = null;
     private Servo StoneR = null;
+    private Servo FoundationServoR = null;
+    private Servo FoundationServoL = null;
     private ElapsedTime runtime = new ElapsedTime();
     //private Telemetry telemetry = null;
     static final double TICKS_PER_REV = 537.6;    // eg: TETRIX Motor Encoder
@@ -37,6 +39,8 @@ public class BlueQuarry extends LinearOpMode {
         FR = hardwareMap.dcMotor.get("FR");
         BR = hardwareMap.dcMotor.get("BR");
         BL = hardwareMap.dcMotor.get("BL");
+        FoundationServoR = hardwareMap.servo.get("FoundationServoR");
+        FoundationServoL = hardwareMap.servo.get("FoundationServoL");
         StoneL = hardwareMap.servo.get("StoneL");
         StoneR = hardwareMap.servo.get("StoneR");
 
@@ -55,87 +59,31 @@ public class BlueQuarry extends LinearOpMode {
         BR.setDirection(DcMotor.Direction.REVERSE);
 
 
-        SkystoneDetector detector = new SkystoneDetector();
-        String SkystonePos ="";
-        telemetry.addData("Main Program - Position",SkystonePos );
-        telemetry.addLine("Ready To Start");
-        telemetry.update();
         waitForStart();
-
-
-        encoderDrive(.2,12,12,30); //move foreward 8 inches for Detection//
-
-
-        SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
-        telemetry.addData("Main Program - Position",SkystonePos );
-        telemetry.update();
-        //SkystonePos="right";
-        if ( SkystonePos.equals("left")){
-            encoderDrive(.4,-24,24,30);//Turn 90 degrees left
-            encoderDrive(.4,12.5,12.5,30);//Move forward to middle skystone
-            strafeDrive(.3,-19,19,30); //Strafe towards Skystone
-            StoneR.setPosition(.4);
-            sleep(1500); //pickup Stone
-            strafeDrive(.3,13.0,-13.0,30);//Coming away from quarry with Stone
-            encoderDrive(.3,44,44,30);//Moving toward building site
-            StoneR.setPosition(0);
-            sleep(250);//drop Stone
-            encoderDrive(.6,-72,-72,30);//Come back to second Skystone
-            strafeDrive(.3,-13.0,13.0,30);//moving toward Stone
-            StoneR.setPosition(.4);
-            sleep(2000);
-            strafeDrive(.3,13.0,-13.0,30);//come back with Stone
-            encoderDrive(.3,69,69,30);//Go forward to bulding site
-            StoneR.setPosition(0);
-            sleep(250);//rop Stone
-            encoderDrive(.3,-25,-25,30);// Come back & Park
-        } else if (SkystonePos.equals("middle")){
-            encoderDrive(.4,-24,24,30);//Turn 90 degrees left
-            encoderDrive(.4,4,4,30);//Move forward to middle skystone
-            strafeDrive(.3,-19,19,30); //Strafe towards Skystone
-            StoneR.setPosition(.4);
-            sleep(1500); //pickup Stone
-            strafeDrive(.3,13.0,-13.0,30);//Coming away from quarry with Stone
-            encoderDrive(.3,52,52,30);//Moving toward building site
-            StoneR.setPosition(0);
-            sleep(250);//drop Stone
-            encoderDrive(.6,-80,-80,30);//Come back to second Skystone
-            strafeDrive(.3,-13.0,13.0,30);//moving toward Stone
-            StoneR.setPosition(.4);
-            sleep(2000);
-            strafeDrive(.3,13.0,-13.0,30);//come back with Stone
-            encoderDrive(.3,77,77,30);//Go forward to bulding site
-            StoneR.setPosition(0);
-            sleep(250);//rop Stone
-            encoderDrive(.3,-25,-25,30);// Come back & Park
+        strafeDrive(.6,-20,20,30);
+        sleep(500);
+        encoderDrive(.5,-32,-32,30);
+        FoundationServoL.setPosition(1); //Grabbing Foundation
+        FoundationServoR.setPosition(.5);
+        sleep(2000);
+        encoderDrive(.3,25,25,30); //Moving backwards with it
+        // sleep(2000);
+        splineDrive(.1,.4,-20,50,20);//Splining into the build zone
+        sleep(500);
+        encoderDrive(.5,-20,-20,30); //aligning to wall
+        sleep(1000);
+        FoundationServoL.setPosition(0);//.3 // lifting servos
+        FoundationServoR.setPosition(1);
+        sleep(2500);
+        strafeDrive(.5,-10,10,30);//aligning to wall
+        encoderDrive(.6,40,40,30);//park
 
 
 
-        } else { //right position
-            encoderDrive(.4,24,-24,30);//Turn 90 degrees left
-            encoderDrive(.4,-3.5,-3.5,30);//Move back to right skystone
-            strafeDrive(.3,-19,19,30); //Strafe towards Skystone
-            StoneR.setPosition(.4);
-            sleep(1500); //pickup Stone
-          /*  strafeDrive(.3,13.0,-13.0,30);//Coming away from quarry with Stone
-            encoderDrive(.3,60,60,30);//Moving toward building site
-            StoneR.setPosition(0);
-            sleep(250);//drop Stone
-            encoderDrive(.6,-88,-88,30);//Come back to second Skystone
-            strafeDrive(.3,-13.0,13.0,30);//moving toward Stone
-            StoneR.setPosition(.4);
-            sleep(2000);
-            strafeDrive(.3,13.0,-13.0,30);//come back with Stone
-            encoderDrive(.3,85,85,30);//Go forward to bulding site
-            StoneR.setPosition(0);
-            sleep(250);//rop Stone
-            encoderDrive(.3,-25,-25,30);// Come back & Park
-*/
+        //encoderDrive(.3,6,6,30);
+        //  splineDrive(.1,.3,-23,38,30);
 
-
-
-        }
-
+        //positioning foundation
 
     }
 
@@ -195,6 +143,103 @@ public class BlueQuarry extends LinearOpMode {
             FL.setPower(Math.abs(speed));
             BR.setPower(Math.abs(speed));
             BL.setPower(Math.abs(speed));
+
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 31.0) &&
+                    (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftFrontTarget,  newRightFrontTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
+
+
+                // FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                // FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+                telemetry.update();
+
+
+
+
+
+            }
+
+            // Stop all motion;
+            FR.setPower(0);
+            FL.setPower(0);
+            BR.setPower(0);
+            BL.setPower(0);
+
+
+
+            // Turn off RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+            FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    //Encoder Drive method
+    public void splineDrive(double lspeed, double rspeed,
+                            double leftInches, double rightInches,
+                            double timeoutS)
+    {
+
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget= 0;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+
+            newLeftFrontTarget = FL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightFrontTarget = FR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftBackTarget = BL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = BR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+
+            FR.setTargetPosition(newRightFrontTarget);
+            FL.setTargetPosition(newLeftFrontTarget);
+            BR.setTargetPosition(newRightBackTarget);
+            BL.setTargetPosition(newLeftBackTarget);
+
+
+            // Turn On RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+          /* runtime.reset();
+           BL.setPower(Math.abs(speedleft));
+           BR.setPower(Math.abs(speedright));
+           FL.setPower(Math.abs(speedleft));
+           FR.setPower(Math.abs(speedright));*/
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            FR.setPower(Math.abs(rspeed));
+            FL.setPower(Math.abs(lspeed));
+            BR.setPower(Math.abs(rspeed));
+            BL.setPower(Math.abs(lspeed));
 
 
             // keep looping while we are still active, and there is time left, and both motors are running.
