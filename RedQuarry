@@ -39,8 +39,8 @@ public class RedQuarry extends LinearOpMode {
         BL = hardwareMap.dcMotor.get("BL");
         StoneL = hardwareMap.servo.get("StoneL");
         StoneR = hardwareMap.servo.get("StoneR");
-        
-        
+
+
 
 
 
@@ -61,77 +61,83 @@ public class RedQuarry extends LinearOpMode {
         telemetry.addLine("Ready To Start");
         telemetry.update();
         waitForStart();
-       
-
-      encoderDrive(.2,12,12,30); //move foreward 8 inches for Detection//
 
 
-        SkystonePos = detector.getSkystonePos(this.hardwareMap ,this);
+        encoderDrive(.3,12,12,30); //move foreward 8 inches for Detection//
+
+
+        SkystonePos = detector.getSkystonePos(this.hardwareMap ,this,"RED");
         telemetry.addData("Main Program - Position",SkystonePos );
         telemetry.update();
-      //  SkystonePos="left";
-       if ( SkystonePos.equals("right")){
-           encoderDrive(.5,24,-24,30); //move towards Skystone
-          encoderDrive(.4,14,14,30);//Turn 90 degrees left
-            strafeDrive(.3,19.5,-19.5,30); //Strafe towards Skystone
-            StoneL.setPosition(0.1);
-            sleep(1250); //pickup Stone
-            strafeDrive(.3,-10.0,10.0,30);//Coming away from quarry with Stone
-           encoderDrive(.3,50,50,30);//Moving toward building site
-            //sleep(500);//drop Stone
-            StoneL.setPosition(.9);
-            encoderDrive(.6,-77,-77,30);//Come back to second Skystone
-           strafeDrive(.3,12.0,-12.0,30);//moving toward Stone
-            StoneL.setPosition(0.1);
-            sleep(1250);
-            strafeDrive(.3,-10.0,10.0,30);//come back with Stone
-            encoderDrive(.3,80,80,30);//Go forward to bulding site
-            StoneL.setPosition(0.9);
-           // sleep(500);//drop Stone
-            encoderDrive(.3,-30,-30,30);// Come back & Park
+        
+        //SkystonePos="right";
+        if ( SkystonePos.equals("left")){
+            encoderDrive(.4,-24,24,30);//Turn 90 degrees left
+            encoderDrive(.4,1.5,1.5,30);//Move forward to left skystone
+            strafeDrive(.4,-19,19,30); //Strafe towards Skystone
+            StoneR.setPosition(0.2);
+            sleep(2100); //pickup   Stone
+            strafeDrive(.4,12.0,-12.0,30);//Coming away from quarry with Stone
+            encoderDrive(.35,-61,-61,30);//Moving toward building site
+            StoneR.setPosition(.7);
+            sleep(250);//drop Stone
+            encoderDrive(.7,88,88,30);//Come back to second Skystone
+            strafeDrive(.4,-12,12,30);//moving toward Stone
+            StoneR.setPosition(.2);
+            sleep(2100);
+            strafeDrive(.4,9.0,-9.0,30);//come back with Stone
+            encoderDrive(.4,-85,-85,30);//Go forward to bulding site
+            StoneR.setPosition(.7);
+            sleep(250);//drop Stone
+            encoderDrive(.3,24,24,30);// Come back & Park
+            sleep(250);
+            strafeDrive(.4,-18,18,30);
 
         } else if (SkystonePos.equals("middle")){
+            encoderDrive(.4,-24,24,30);//Turn 90 degrees left
+            encoderDrive(.4,-8,-8,30);//Move forward to middle skystone
+            strafeDrive(.4,-19,19,30); //Strafe towards Skystone
+            StoneR.setPosition(.2);
+            sleep(2100); //pickup Stone
+            strafeDrive(.3,13.0,-13.0,30);//Coming away from quarry with Stone
+            encoderDrive(.4,-54,-54,30);//Moving toward building site
+            StoneR.setPosition(0.7);
+            sleep(250);//drop Stone
+            encoderDrive(.5,83,83,30);//Come back to second Skystone
+            strafeDrive(.4,-12,12,30);//moving toward Stone
+            StoneR.setPosition(.2);
+            sleep(2100);
+            strafeDrive(.4,9.0,-9.0,30);//come back with Stone
+            encoderDrive(.3,-79,-79,30);//Go forward to bulding site
+            StoneR.setPosition(.7);
+            sleep(250);//drop Stone
+            encoderDrive(.3,21,21,30);// Come back & Park
+            sleep(250);
+            strafeDrive(.4,-15,15,30);
 
-            encoderDrive(.4,24,-24,30);//Turn 90 degrees left
-            encoderDrive(.4,4,4,30);
-            strafeDrive(.3,19,-19,30); //Strafe towards Skystone
-            StoneL.setPosition(0.1);
-            sleep(750); //pickup Stone
-            strafeDrive(.3,-9.0,9.0,30);//Coming away from quarry with Stone
-            encoderDrive(.3,50,50,30);//Moving toward building site
-            StoneL.setPosition(0.9);
-            //sleep(750);//drop Stone
-            encoderDrive(.6,-80,-80,30);//Come back to second Skystone
-            strafeDrive(.3,10.0,-10.0,30);//moving toward Stone
-            StoneL.setPosition(0.1);
-            sleep(750);
-            strafeDrive(.3,-10.0,10.0,30);//come back with Stone
-            encoderDrive(.3,85,85,30);//Go forward to bulding site
-            StoneL.setPosition(0.9);
-           // sleep(750);//drop Stone
-            encoderDrive(.3,-30,-30,30);// Come back & Park
+    
 
-
-        } else {
-            encoderDrive(.4,24,-24,30);//Turn 90 degrees left
-            encoderDrive(.4,-5,-5,30);//Turn 90 degrees left
-            strafeDrive(.3,19,-19,30); //Strafe towards Skystone
-            StoneL.setPosition(0.1);
-            sleep(750); //pickup Stone
-            strafeDrive(.3,-9.0,9.0,30);//Coming away from quarry with Stone
-            encoderDrive(.3,60,60,30);//Moving toward building site
-            StoneL.setPosition(0.9);
-          //  sleep(750);//drop Stone
-            encoderDrive(.6,-80,-80,30);//Come back to second Skystone
-            strafeDrive(.3,10.0,-10.0,30);//moving toward Stone
-            StoneL.setPosition(0.1);
-            sleep(750);
-            strafeDrive(.3,-10.0,10.0,30);//come back with Stone
-            encoderDrive(.3,85,85,30);//Go forward to bulding site
-            StoneL.setPosition(0.9);
-            //sleep(750);//drop Stone
-            encoderDrive(.3,-25,-25,30);// Come back & Park
-
+        } else { //right position
+            encoderDrive(.4,-24,24,30);//Turn 90 degrees left
+            encoderDrive(.4,-15,-15,30);//Move forward to middle skystone
+            strafeDrive(.4,-19,19,30); //Strafe towards Skystone
+            StoneR.setPosition(.2);
+            sleep(2100); //pickup Stone
+            strafeDrive(.3,13.0,-13.0,30);//Coming away from quarry with Stone
+            encoderDrive(.4,-48,-48,30);//Moving toward building site
+            StoneR.setPosition(0.7);
+            sleep(250);//drop Stone
+            encoderDrive(.5,74.5,74.5,30);//Come back to second Skystone
+            strafeDrive(.4,-11,11,30);//moving toward Stone
+            StoneR.setPosition(.2);
+            sleep(2100);
+            strafeDrive(.4,9.0,-9.0,30);//come back with Stone
+            encoderDrive(.4,-73,-73,30);//Go forward to bulding site
+            StoneR.setPosition(.7);
+            sleep(250);//drop Stone
+            encoderDrive(.5,18,18,30);// Come back & Park
+            sleep(250);
+            strafeDrive(.5,-14,14,30);
 
 
 
