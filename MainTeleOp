@@ -30,6 +30,7 @@ public class MainTeleOp extends LinearOpMode {
     private Servo FoundationServoL;
     private Servo FoundationServoR;
     private Servo DepositServo;
+    private Servo CapstoneServo;
     private DigitalChannel TouchR;
     private DigitalChannel TouchL;
 
@@ -50,6 +51,7 @@ public class MainTeleOp extends LinearOpMode {
         FoundationServoL = hardwareMap.servo.get("FoundationServoL");
         OuttakeL = hardwareMap.servo.get("OuttakeL");
         OuttakeR = hardwareMap.servo.get("OuttakeR");
+        CapstoneServo = hardwareMap.servo.get("CapstoneServo");
         TouchR = hardwareMap.digitalChannel.get("TouchR");
         TouchL = hardwareMap.digitalChannel.get("TouchL");
 
@@ -79,22 +81,22 @@ public class MainTeleOp extends LinearOpMode {
 // moving the robot forward and backward
 
 
-            if (gamepad2.dpad_down) {
+            if (gamepad1.dpad_down) {
                 StoneR.setPosition(0);
             }
 
-            if (gamepad2.dpad_up) {
+            if (gamepad1.dpad_up) {
 
-                StoneR.setPosition(0.35);
+                StoneR.setPosition(0.7);
             }
 
-            if (gamepad2.dpad_left) {
+            if (gamepad1.dpad_left) {
                 StoneL.setPosition(0);
             }
-            //      if(gamepad2.dpad_right){
+            if(gamepad1.dpad_right){
 
-            //     //StoneL.setPosition(.9);
-            //   }
+                StoneL.setPosition(.9);
+            }
 
 
           /*  PulleyL.setPower(Range.clip(gamepad2.right_stick_y, -.5, .5));
@@ -102,59 +104,144 @@ public class MainTeleOp extends LinearOpMode {
 */
 
             if (gamepad1.x) {
-                FoundationServoL.setPosition(1);
-               FoundationServoR.setPosition(0);
+                FoundationServoL.setPosition(.7);
+                FoundationServoR.setPosition(.3);
             }
             if (gamepad1.y) {
-                 FoundationServoL.setPosition(0);
-               FoundationServoR.setPosition(1);
+                FoundationServoL.setPosition(0);
+                FoundationServoR.setPosition(1);
             }
+            if (gamepad1.b){
+                CapstoneServo.setPosition(.4);
+            }
+            if (gamepad1.a){
+                CapstoneServo.setPosition(1);
+
+            }
+
+            if(gamepad1.left_bumper){
+
+                FL.setPower(-1);
+                FR.setPower(-1);
+                BL.setPower(1);
+                BR.setPower(1);
+
+            }
+
+            if(gamepad1.right_bumper){
+
+                FL.setPower(1);
+                FR.setPower(1);
+                BL.setPower(-1);
+                BR.setPower(-1);
+
+            }
+
+//             FL.setPower(-gamepad1.left_stick_y);
+//             FR.setPower(-gamepad1.left_stick_y);
+//             BL.setPower(-gamepad1.left_stick_y);
+//             BR.setPower(-gamepad1.left_stick_y);
+//  strafing
+//             FL.setPower(gamepad1.left_stick_x);
+//             FR.setPower(gamepad1.left_stick_x);
+//             BL.setPower(-gamepad1.left_stick_x);
+//             BR.setPower(-gamepad1.left_stick_x);
+// turning on the right joystick
+//             FL.setPower(gamepad1.right_stick_x);
+//             FR.setPower(-gamepad1.right_stick_x);
+//             BL.setPower(gamepad1.right_stick_x);
+//             BR.setPower(-gamepad1.right_stick_x);
 
 
             FL.setPower(-gamepad1.left_stick_y);
-            FR.setPower(-gamepad1.left_stick_y);
+            FR.setPower(-gamepad1.right_stick_y);
             BL.setPower(-gamepad1.left_stick_y);
-            BR.setPower(-gamepad1.left_stick_y);
-// strafing
-            FL.setPower(gamepad1.left_stick_x);
-            FR.setPower(gamepad1.left_stick_x);
-            BL.setPower(-gamepad1.left_stick_x);
-            BR.setPower(-gamepad1.left_stick_x);
-//turning on the right joystick
-            FL.setPower(gamepad1.right_stick_x);
-            FR.setPower(-gamepad1.right_stick_x);
-            BL.setPower(gamepad1.right_stick_x);
-            BR.setPower(-gamepad1.right_stick_x);
+            BR.setPower(-gamepad1.right_stick_y);
+
+            // if(gamepad1.dpad_left){
+            //     FL.setPower(-1);
+            //     FR.setPower(1);
+            //     BL.setPower(1);
+            //     FR.setPower(-1);
+
+
+            // }
+
+            // if(gamepad1.dpad_right){
+            //     FL.setPower(1);
+            //     FR.setPower(-1);
+            //     BL.setPower(-1);
+            //     FR.setPower(1);
+
+
+            // }
+
+
+     /*   FL.setPower(-gamepad1.left_trigger);
+        FR.setPower(-gamepad1.left_trigger);
+        BL.setPower(gamepad1.left_trigger);
+        BR.setPower(gamepad1.left_trigger);
+
+        FL.setPower(gamepad1.right_trigger);
+        FR.setPower(gamepad1.right_trigger);
+        BL.setPower(-gamepad1.right_trigger);
+        BR.setPower(-gamepad1.right_trigger);
+
+     */
+
+
+
+
 
 
             //intake
 
-            IR.setPower(Range.clip(-gamepad2.left_stick_y, -.8, .8));
-            IL.setPower(Range.clip(-gamepad2.left_stick_y, -.8, .8));
+            IR.setPower(Range.clip(gamepad2.left_stick_y, -.3, .3));
+            IL.setPower(Range.clip(gamepad2.left_stick_y, -.3, .3));
+            telemetry.addData("Left Intake Speed",(Range.clip(gamepad2.left_stick_y, -.3, .3)));
+            telemetry.addData("Right Intake Speed",(Range.clip(gamepad2.right_stick_y, -.3, .3)));
+            telemetry.update();
 
-
-            //outtake 
+            //outtake
 
             //   if(gamepad2.y){
             //       OuttakeL.setPosition(0);
             //       OuttakeR.setPosition(1);
 
             if (gamepad2.x) {
-                OuttakeL.setPosition(.65);
-                OuttakeR.setPosition(0);
+                OuttakeL.setPosition(1); //takes out of robot
+                OuttakeR.setPosition(.2);
             }
             if (gamepad2.y) {
-                OuttakeL.setPosition(0);
-                OuttakeR.setPosition(1);
+                OuttakeL.setPosition(.375); //puts it in
+                OuttakeR.setPosition(.8);
             }
-            if (gamepad2.a) {
-                DepositServo.setPosition(1);
-            }
-
             if (gamepad2.b) {
-                DepositServo.setPosition(.45);
+                DepositServo.setPosition(.8);
+            }
+
+            if (gamepad2.a) {
+                DepositServo.setPosition(.9);
 
             }
+            if (gamepad2.dpad_up){
+                OuttakeL.setPosition(.5);
+                OuttakeR.setPosition(.6);
+            }
+
+
+
+
+          /*  if(gamepad2.a){
+         if(DepositServo == .75){
+         DepositServo.setPosition(.8);
+         servoSpot = .8;
+    } else {
+        Deposit.setPosition(.8);
+        servoSpot = .75;
+     }
+}
+*/
 
             if ((TouchR.getState() == true)) {
                 PulleyR.setDirection(DcMotor.Direction.FORWARD);
@@ -166,9 +253,9 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.addData("Not Pressed", TouchR.getState());
                 telemetry.update();
             } else {
-             //   telemetry.addData("Pressed", TouchR.getState());
-                PulleyR.setPower(-.5);
-                PulleyL.setPower(.5);
+                //   telemetry.addData("Pressed", TouchR.getState());
+                PulleyR.setPower(-.1);
+                PulleyL.setPower(.1);
                 telemetry.addData("Not Pressed", TouchR.getState());
                 telemetry.update();
 
@@ -184,9 +271,9 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.addData("Not Pressed", TouchL.getState());
                 telemetry.update();
             } else {
-             //   telemetry.addData("Pressed", TouchR.getState());
-                PulleyR.setPower(-.5);
-                PulleyL.setPower(.5);
+                //   telemetry.addData("Pressed", TouchR.getState());
+                PulleyR.setPower(-.1);
+                PulleyL.setPower(.1);
                 telemetry.addData("Not Pressed", TouchL.getState());
                 telemetry.update();
 
