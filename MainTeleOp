@@ -152,12 +152,21 @@ public class MainTeleOp extends LinearOpMode {
 //             BL.setPower(gamepad1.right_stick_x);
 //             BR.setPower(-gamepad1.right_stick_x);
 
-
-            FL.setPower(-gamepad1.left_stick_y);
-            FR.setPower(-gamepad1.right_stick_y);
-            BL.setPower(-gamepad1.left_stick_y);
-            BR.setPower(-gamepad1.right_stick_y);
-
+         if(gamepad1.left_stick_button & gamepad1.right_stick_button) {
+             FL.setPower(.5 * -gamepad1.left_stick_y);
+             FR.setPower(.5 * -gamepad1.right_stick_y);
+             BL.setPower(.5 * -gamepad1.left_stick_y);
+             BR.setPower(.5 * -gamepad1.right_stick_y);
+             telemetry.addLine("Slow Mode = True");
+             telemetry.update();
+         } else {
+             FL.setPower(-gamepad1.left_stick_y);
+             FR.setPower(-gamepad1.right_stick_y);
+             BL.setPower(-gamepad1.left_stick_y);
+             BR.setPower(-gamepad1.right_stick_y);
+             telemetry.addLine("Slow Mode = False");
+             telemetry.update();
+         }
             // if(gamepad1.dpad_left){
             //     FL.setPower(-1);
             //     FR.setPower(1);
@@ -305,7 +314,6 @@ public class MainTeleOp extends LinearOpMode {
     }
 
 }
-
 
 
 
