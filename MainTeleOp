@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import junit.framework.Test;
 
 
 @TeleOp(name = "MainTeleOp")
@@ -33,8 +33,32 @@ public class MainTeleOp extends LinearOpMode {
     private Servo CapstoneServo;
     private DigitalChannel TouchR;
     private DigitalChannel TouchL;
+    private ElapsedTime runtime = new ElapsedTime();
+    boolean opened = false;
+    boolean slowmode = false;
 
     //private Servo FoundationServo;
+
+    static final double TICKS_PER_REV = 537.6;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES =1.5;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (TICKS_PER_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
+    // PID Constants
+    double kP   =   0.0;
+
+    double kI   =   0.0; // not being used, just here for future
+
+    double kD   =   0.0;
+
+
+    double currentError;
+    double lastError;
+    double proportional;
+    double derivative;
+    double PD;
+
 
 
     @Override
@@ -54,14 +78,13 @@ public class MainTeleOp extends LinearOpMode {
         CapstoneServo = hardwareMap.servo.get("CapstoneServo");
         TouchR = hardwareMap.digitalChannel.get("TouchR");
         TouchL = hardwareMap.digitalChannel.get("TouchL");
-
+        
+        PulleyL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        PulleyR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         StoneR = hardwareMap.servo.get("StoneR");
         StoneL = hardwareMap.servo.get("StoneL");
         DepositServo = hardwareMap.servo.get("DepositServo");
-
-        //FoundationServo = hardwareMap.servo.get("FoundationServo");
-
 
         FR.setDirection(DcMotor.Direction.REVERSE);
         BR.setDirection(DcMotor.Direction.REVERSE);
@@ -84,173 +107,133 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad1.dpad_down) {
                 StoneR.setPosition(0);
             }
-
             if (gamepad1.dpad_up) {
-
                 StoneR.setPosition(0.7);
             }
-
             if (gamepad1.dpad_left) {
                 StoneL.setPosition(0);
             }
             if(gamepad1.dpad_right){
-
                 StoneL.setPosition(.9);
             }
-
-
-          /*  PulleyL.setPower(Range.clip(gamepad2.right_stick_y, -.5, .5));
-            PulleyR.setPower(Range.clip(gamepad2.right_stick_y, -.5, .5));
-*/
-
             if (gamepad1.x) {
-                FoundationServoL.setPosition(.7);
-                FoundationServoR.setPosition(.3);
+                FoundationServoL.setPosition(.6);
+                FoundationServoR.setPosition(.4); // down close to the ground
             }
             if (gamepad1.y) {
-                FoundationServoL.setPosition(0);
-                FoundationServoR.setPosition(1);
+                FoundationServoL.setPosition(.1); // up on the robot
+                FoundationServoR.setPosition(.9);
             }
             if (gamepad1.b){
                 CapstoneServo.setPosition(.4);
             }
             if (gamepad1.a){
                 CapstoneServo.setPosition(1);
-
             }
-
             if(gamepad1.left_bumper){
-
                 FL.setPower(-1);
                 FR.setPower(-1);
                 BL.setPower(1);
                 BR.setPower(1);
-
             }
-
             if(gamepad1.right_bumper){
-
                 FL.setPower(1);
                 FR.setPower(1);
                 BL.setPower(-1);
                 BR.setPower(-1);
-
             }
+            FL.setPower(-gamepad1.left_stick_y);
+            FR.setPower(-gamepad1.right_stick_y);
+            BL.setPower(-gamepad1.left_stick_y);
+            BR.setPower(-gamepad1.right_stick_y);
 
-//             FL.setPower(-gamepad1.left_stick_y);
-//             FR.setPower(-gamepad1.left_stick_y);
-//             BL.setPower(-gamepad1.left_stick_y);
-//             BR.setPower(-gamepad1.left_stick_y);
-//  strafing
-//             FL.setPower(gamepad1.left_stick_x);
-//             FR.setPower(gamepad1.left_stick_x);
-//             BL.setPower(-gamepad1.left_stick_x);
-//             BR.setPower(-gamepad1.left_stick_x);
-// turning on the right joystick
-//             FL.setPower(gamepad1.right_stick_x);
-//             FR.setPower(-gamepad1.right_stick_x);
-//             BL.setPower(gamepad1.right_stick_x);
-//             BR.setPower(-gamepad1.right_stick_x);
+            IR.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
+            IL.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
+            IR.setPower(Range.clip(-gamepad2.left_trigger, -.35, .35));
+            IL.setPower(Range.clip(-gamepad2.left_trigger, -.35, .35));
 
-         if(gamepad1.left_stick_button & gamepad1.right_stick_button) {
-             FL.setPower(.5 * -gamepad1.left_stick_y);
-             FR.setPower(.5 * -gamepad1.right_stick_y);
-             BL.setPower(.5 * -gamepad1.left_stick_y);
-             BR.setPower(.5 * -gamepad1.right_stick_y);
-             telemetry.addLine("Slow Mode = True");
-             telemetry.update();
-         } else {
-             FL.setPower(-gamepad1.left_stick_y);
-             FR.setPower(-gamepad1.right_stick_y);
-             BL.setPower(-gamepad1.left_stick_y);
-             BR.setPower(-gamepad1.right_stick_y);
-             telemetry.addLine("Slow Mode = False");
-             telemetry.update();
-         }
-            // if(gamepad1.dpad_left){
-            //     FL.setPower(-1);
-            //     FR.setPower(1);
-            //     BL.setPower(1);
-            //     FR.setPower(-1);
-
-
-            // }
-
-            // if(gamepad1.dpad_right){
-            //     FL.setPower(1);
-            //     FR.setPower(-1);
-            //     BL.setPower(-1);
-            //     FR.setPower(1);
-
-
-            // }
-
-
-     /*   FL.setPower(-gamepad1.left_trigger);
-        FR.setPower(-gamepad1.left_trigger);
-        BL.setPower(gamepad1.left_trigger);
-        BR.setPower(gamepad1.left_trigger);
-
-        FL.setPower(gamepad1.right_trigger);
-        FR.setPower(gamepad1.right_trigger);
-        BL.setPower(-gamepad1.right_trigger);
-        BR.setPower(-gamepad1.right_trigger);
-
-     */
-
-
-
-
-
-
-            //intake
-
-            IR.setPower(Range.clip(gamepad2.left_stick_y, -.3, .3));
-            IL.setPower(Range.clip(gamepad2.left_stick_y, -.3, .3));
             telemetry.addData("Left Intake Speed",(Range.clip(gamepad2.left_stick_y, -.3, .3)));
             telemetry.addData("Right Intake Speed",(Range.clip(gamepad2.right_stick_y, -.3, .3)));
             telemetry.update();
 
-            //outtake
+            if(opened == false && gamepad2.x){
 
-            //   if(gamepad2.y){
-            //       OuttakeL.setPosition(0);
-            //       OuttakeR.setPosition(1);
-
-            if (gamepad2.x) {
                 OuttakeL.setPosition(1); //takes out of robot
                 OuttakeR.setPosition(.2);
+                sleep(250);
+                opened = true;
             }
-            if (gamepad2.y) {
+            if (gamepad2.x && opened == true) {
+                OuttakeL.setPosition(.3); //takes out of robot
+                OuttakeR.setPosition(.8);
+                sleep(250);
+                opened =false;
+            }
+            if(opened == false && gamepad2.a){
+                DepositServo.setPosition(.8);
+                sleep(250);
+                opened = true;
+            }
+            if (gamepad2.a && opened == true) {
+                DepositServo.setPosition(.9);
+                //sleep so the open variable does not get set at the same time as the click
+                sleep(250);
+                opened =false;
+            }
+
+            if(gamepad2.b){
+                //close grabber
+                DepositServo.setPosition(.9);
+                //flip deposit into robot
                 OuttakeL.setPosition(.375); //puts it in
                 OuttakeR.setPosition(.8);
-            }
-            if (gamepad2.b) {
-                DepositServo.setPosition(.8);
+                sleep(800);
+                //move pulley back to bottom position
+                while(TouchR.getState() == true && TouchL.getState() == true){
+                    PulleyR.setPower(.4);
+                    PulleyL.setPower(-.4);
+                }
             }
 
-            if (gamepad2.a) {
-                DepositServo.setPosition(.9);
 
-            }
-            if (gamepad2.dpad_up){
+
+
+
+
+
+
+            // if (gamepad2.y){
+            //      OuttakeL.setPosition(.5);
+            //     OuttakeR.setPosition(.6);
+            // }
+/*
+            if(opened == false && gamepad2.y){
                 OuttakeL.setPosition(.5);
                 OuttakeR.setPosition(.6);
+                //sleep so the open variable does not get set at the same time as the click
+                sleep(250);
+
+                opened = true;
             }
 
+            if (gamepad2.a && opened == true) {
+                OuttakeL.setPosition(.3); //takes out of robot
+                OuttakeR.setPosition(.8);
+                //sleep so the open variable does not get set at the same time as the click
+                sleep(250);
+                opened =false;
+            }
 
-
-
-          /*  if(gamepad2.a){
-         if(DepositServo == .75){
-         DepositServo.setPosition(.8);
-         servoSpot = .8;
-    } else {
-        Deposit.setPosition(.8);
-        servoSpot = .75;
-     }
-}
 */
+            if(opened == false && gamepad2.y){
+                OuttakeL.setPosition(.5);
+                OuttakeR.setPosition(.6);
+                //sleep so the open variable does not get set at the same time as the click
+                sleep(250);
+
+                opened = true;
+            }
+
 
             if ((TouchR.getState() == true)) {
                 PulleyR.setDirection(DcMotor.Direction.FORWARD);
@@ -267,8 +250,6 @@ public class MainTeleOp extends LinearOpMode {
                 PulleyL.setPower(.1);
                 telemetry.addData("Not Pressed", TouchR.getState());
                 telemetry.update();
-
-
             }
             if ((TouchL.getState() == true)) {
                 PulleyR.setDirection(DcMotor.Direction.FORWARD);
@@ -287,37 +268,79 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.update();
 
 
+
+            }
+
+            //lift
+
+            public void pulleyDrive(double speed,double inches,double timeoutS)
+            {
+
+                int newTarget;
+
+                // Ensure that the opmode is still active
+                if (opModeIsActive()) {
+
+                    newTarget = FL.getCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
+
+
+
+                    PulleyR.setTargetPosition(newTarget);
+                    PulleyL.setTargetPosition(newTarget);
+
+
+
+                    // Turn On RUN_TO_POSITION
+                    PulleyR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    PulleyL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+                    // reset the timeout time and start motion.
+                    runtime.reset();
+                    PulleyR.setPower(Math.abs(speed));
+                    PulleyL.setPower(Math.abs(speed));
+
+                    currentError = ((newTarget) -  (PulleyR.getCurrentPosition()));
+
+
+                    // keep looping while we are still active, and there is time left, and both motors are running.
+                    // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+                    // its target position, the motion will stop.  This is "safer" in the event that the robot will
+                    // always end the motion as soon as possible.
+                    // However, if you require that BOTH motors have finished their moves before the robot continues
+                    // onto the next step, use (isBusy() || isBusy()) in the loop test.
+
+
+                    // Stop all motion;
+                    PulleyR.setPower(0);
+                    PulleyL.setPower(0);
+
+
+
+
+
+                    PulleyR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    PulleyL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    //  sleep(250);   // optional pause after each move
+                }
             }
 
 
+             proportional = (currentError)             * (kP);
+             derivative   = (currentError - lastError) * (kD);
+
+
+
+
+            lastError = currentError;
+
+
+
+            PDpower = proportional + derivative; //set this as your motor power in the method
         }
-
-
-//            FL.setPower(-gamepad1.left_stick_x);
-//            FR.setPower(gamepad1.right_stick_x);
-//            BL.setPower(gamepad1.right_stick_x);
-//            BR.setPower(-gamepad1.left_stick_x);
-//            if(gamepad1.dpad_left){
-//                FL.setPower(-1);
-//                FR.setPower(1);
-//                BL.setPower(1);
-//                BR.setPower(-1);
-//            }
-//            if(gamepad1.dpad_right){
-//                FL.setPower(1);
-//                FR.setPower(-1);
-//                BL.setPower(-1);
-//                BR.setPower(1);
-//            }
-
-
     }
 
 }
-
-
-
-
-
-
-
