@@ -93,12 +93,12 @@ public class MainTeleOp extends LinearOpMode {
                 StoneL.setPosition(.9);
             }
             if (gamepad1.x) {
-                FoundationServoL.setPosition(.6);
-                FoundationServoR.setPosition(.4); // down close to the ground
+                FoundationServoL.setPosition(.7);
+                FoundationServoR.setPosition(.3); // down close to the ground
             }
             if (gamepad1.y) {
-                FoundationServoL.setPosition(.1); // up on the robot
-                FoundationServoR.setPosition(.9);
+                FoundationServoL.setPosition(.15); // up on the robot
+                FoundationServoR.setPosition(.85);
             }
             if (gamepad1.b){
                 CapstoneServo.setPosition(.4);
@@ -122,16 +122,13 @@ public class MainTeleOp extends LinearOpMode {
             FR.setPower(-gamepad1.right_stick_y);
             BL.setPower(-gamepad1.left_stick_y);
             BR.setPower(-gamepad1.right_stick_y);
-
+          
             IR.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
             IL.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
+           
             IR.setPower(Range.clip(-gamepad2.left_trigger, -.35, .35));
             IL.setPower(Range.clip(-gamepad2.left_trigger, -.35, .35));
-
-            telemetry.addData("Left Intake Speed",(Range.clip(gamepad2.left_stick_y, -.3, .3)));
-            telemetry.addData("Right Intake Speed",(Range.clip(gamepad2.right_stick_y, -.3, .3)));
-            telemetry.update();
-
+            
             if(opened == false && gamepad2.x){
 
                 OuttakeL.setPosition(1); //takes out of robot
@@ -156,7 +153,8 @@ public class MainTeleOp extends LinearOpMode {
                 sleep(250);
                 opened =false;
             }
-
+            
+            
             if(gamepad2.b){
                 //close grabber
                 DepositServo.setPosition(.9);
@@ -170,13 +168,6 @@ public class MainTeleOp extends LinearOpMode {
                     PulleyL.setPower(-.4);
                 }
             }
-
-
-
-
-
-
-
 
             // if (gamepad2.y){
             //      OuttakeL.setPosition(.5);
@@ -201,14 +192,14 @@ public class MainTeleOp extends LinearOpMode {
             }
             
 */
-            if(opened == false && gamepad2.y){
-                OuttakeL.setPosition(.5);
-                OuttakeR.setPosition(.6);
+    if(opened == false && gamepad2.y){
+            OuttakeL.setPosition(.6);
+                OuttakeR.setPosition(.6); 
                 //sleep so the open variable does not get set at the same time as the click
                 sleep(250);
-
+                
                 opened = true;
-            }
+            } 
 
 
             if ((TouchR.getState() == true)) {
@@ -222,12 +213,13 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.update();
             } else {
                 //   telemetry.addData("Pressed", TouchR.getState());
-                PulleyR.setPower(-.1);
-                PulleyL.setPower(.1);
+                PulleyR.setPower(-.3);
+                PulleyL.setPower(.3);
                 telemetry.addData("Not Pressed", TouchR.getState());
                 telemetry.update();
             }
-            if ((TouchL.getState() == true)) {
+         
+         if ((TouchL.getState() == true)) {
                 PulleyR.setDirection(DcMotor.Direction.FORWARD);
                 PulleyR.setPower(gamepad2.right_stick_y);
                 PulleyL.setDirection(DcMotor.Direction.FORWARD);
@@ -238,8 +230,8 @@ public class MainTeleOp extends LinearOpMode {
                 telemetry.update();
             } else {
                 //   telemetry.addData("Pressed", TouchR.getState());
-                PulleyR.setPower(-.1);
-                PulleyL.setPower(.1);
+                PulleyR.setPower(-.3);
+                PulleyL.setPower(.3);
                 telemetry.addData("Not Pressed", TouchL.getState());
                 telemetry.update();
 
