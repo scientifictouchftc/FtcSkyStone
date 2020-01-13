@@ -106,22 +106,37 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad1.a){
                 CapstoneServo.setPosition(1);
             }
-            if(gamepad1.left_bumper){
-                FL.setPower(-1);
-                FR.setPower(-1);
-                BL.setPower(1);
-                BR.setPower(1);
-            }
-            if(gamepad1.right_bumper){
-                FL.setPower(1);
-                FR.setPower(1);
-                BL.setPower(-1);
-                BR.setPower(-1);
-            }
-            FL.setPower(-gamepad1.left_stick_y);
-            FR.setPower(-gamepad1.right_stick_y);
-            BL.setPower(-gamepad1.left_stick_y);
-            BR.setPower(-gamepad1.right_stick_y);
+            
+            
+            
+            //gamepad1 drive train controls
+            
+      
+            
+            float forwardBackAxis = gamepad1.left_stick_y; //moving forward
+            float leftRightAxis = gamepad1.left_stcik_x; // strafing
+            float spinAxis = gamepad1.right_stick_x; // turning
+            
+            
+            //math tings
+            float FRpower = forwardBackAxis + leftRightAxis + spinAxis;
+            float FLpower = forwardBackAxis + leftRightAxis - spinAxis;
+            float BRpower = forwardBackAxis - leftRightAxis + spinAxis;
+            float BLpower = forwardBackAxis - leftRightAxis - spinAxis;
+            
+            
+            FR.setPower(FRpower);
+            FL.setPower(FLpower);
+            BR.setPower(BRpower);
+            BL.setPower(BLpower);
+            
+            
+            
+            
+            
+            
+            
+            
           
             IR.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
             IL.setPower(Range.clip(gamepad2.right_trigger, -.7, .7));
