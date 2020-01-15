@@ -101,10 +101,10 @@ public class MainTeleOp extends LinearOpMode {
                 FoundationServoR.setPosition(.85);
             }
             if (gamepad1.b){
-                CapstoneServo.setPosition(.4);
+                CapstoneServo.setPosition(1);
             }
             if (gamepad1.a){
-                CapstoneServo.setPosition(1);
+                CapstoneServo.setPosition(.85);
             }
            
            
