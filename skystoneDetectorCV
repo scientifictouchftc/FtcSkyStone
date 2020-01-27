@@ -1,0 +1,106 @@
+package org.firstinspires.ftc.teamcode.Autonomous;
+
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.teamcode.EasyOpenCV.CustomSkystoneDetector;
+//import org.firstinspires.ftc.teamcode.RobotMap;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+/*
+ * Thanks to EasyOpenCV for the great API (and most of the example)
+ *
+ * Original Work Copright(c) 2019 OpenFTC Team
+ * Derived Work Copyright(c) 2019 DogeDevs
+ */
+
+public class SkystoneDetectorCV {
+    //phone cam object init
+    private OpenCvCamera webcam;
+    private CustomSkystoneDetector skyStoneDetector;
+    //
+
+
+    String skystonePosition = "none";
+    double xPosition;
+
+
+
+    public String getSkystonePos(HardwareMap hardwareMap , LinearOpMode opMode, String sideColor) {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
+         * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
+         */
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        /*
+         * Open the connection to the camera device
+         */
+        webcam.openCameraDevice();
+        /*
+         * Specify the image processing pipeline we wish to invoke upon receipt
+         * of a frame from the camera. Note that switching pipelines on-the-fly
+         * (while a streaming session is in flight) *IS* supported.
+         */
+        skyStoneDetector = new CustomSkystoneDetector();
+        skyStoneDetector.useDefaults();
+
+        webcam.setPipeline(skyStoneDetector);
+
+        /*
+         * Tell the camera to start streaming images to us! Note that you must make sure
+         * the resolution you specify is supported by the camera. If it is not, an exception
+         * will be thrown.
+         *
+         * Also, we specify the rotation that the camera is used in. This is so that the image
+         * from the camera sensor can be rotated such that it is always displayed with the image upright.
+         * For a front facing camera, rotation is defined assuming the user is looking at the screen.
+         * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
+         * away from the user.
+         */
+        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+
+
+        while (!opMode.isStopRequested() && !opMode.opModeIsActive()) {
+            xPosition = skyStoneDetector.foundRectangle().x;
+            if (sideColor.equals("BLUE")) {
+                if (xPosition <= 90) { //TODO Tune these numbers
+                    skystonePosition = "left";
+
+                } else if (xPosition > 90 && xPosition < 175) {
+                    skystonePosition = "center";
+
+                } else if (xPosition >= 250.0) {
+                    skystonePosition = "right";
+                }
+            } else{
+                if (xPosition <= 90) { //TODO Tune these numbers
+                    skystonePosition = "left";
+
+                } else if (xPosition > 90 && xPosition < 175) {
+                    skystonePosition = "center";
+
+                } else if (xPosition >= 250.0) {
+                    skystonePosition = "right";
+                }
+            }
+            opMode.telemetry.addData("xPos for "+ sideColor + " :", xPosition);
+            opMode.telemetry.addData("SkyStone Pos", skystonePosition);
+            opMode.telemetry.update();
+        }
+
+        webcam.stopStreaming();
+        return skystonePosition;
+
+    }
+
+}
