@@ -1,16 +1,18 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.EasyOpenCV.CustomSkystoneDetector;
+
 import com.qualcomm.robotcore.util.Hardware;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "BlueQuarry")
+@Autonomous(name = "BlueQuarryCV")
 public class BlueQuarry extends LinearOpMode {
     private DcMotor FR = null;
     private DcMotor FL = null;
@@ -47,18 +49,22 @@ public class BlueQuarry extends LinearOpMode {
         FR.setDirection(DcMotor.Direction.REVERSE);
         BR.setDirection(DcMotor.Direction.REVERSE);
 
-        SkystoneDetector detector = new SkystoneDetector();
+        SkystoneDetectorCV detector = new SkystoneDetectorCV();
         String SkystonePos ="";
-        telemetry.addData("Main Program - Position",SkystonePos );
+         telemetry.addData("Main Program - Position-Init",SkystonePos );
         telemetry.addLine("Ready To Start");
         telemetry.update();
-        waitForStart();
-
-        encoderDrive(.3,12,12,30); //move foreward 8 inches for Detection//
 
         SkystonePos = detector.getSkystonePos(this.hardwareMap ,this,"BLUE");
-        telemetry.addData("Main Program - Position",SkystonePos );
+        waitForStart();
+
+        //encoderDrive(.3,12,12,30); //move foreward 8 inches for Detection//
+
+
+        telemetry.addData("Main Program - Position-RunTime",SkystonePos );
         telemetry.update();
+        sleep(20000);
+
         //SkystonePos="right";
         if ( SkystonePos.equals("left")){
             encoderDrive(.4,24,-24,30);//Turn 90 degrees left
