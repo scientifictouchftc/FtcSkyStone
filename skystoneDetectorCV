@@ -77,19 +77,19 @@ public class SkystoneDetectorCV {
                     skystonePosition = "left";
 
                 } else if (xPosition > 90 && xPosition < 175) {
-                    skystonePosition = "center";
+                    skystonePosition = "middle";
 
-                } else if (xPosition >= 250.0) {
+                } else if (xPosition >= 225.0) {
                     skystonePosition = "right";
                 }
             } else{
-                if (xPosition <= 90) { //TODO Tune these numbers
+                if (xPosition <= 30) { //TODO Tune these numbers
                     skystonePosition = "left";
 
-                } else if (xPosition > 90 && xPosition < 175) {
-                    skystonePosition = "center";
+                } else if (xPosition > 50 && xPosition < 100) {
+                    skystonePosition = "middle";
 
-                } else if (xPosition >= 250.0) {
+                } else if (xPosition >= 110) {
                     skystonePosition = "right";
                 }
             }
