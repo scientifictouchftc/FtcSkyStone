@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "RedQuarryCV")
-public class RedQuarry extends LinearOpMode {
+@Autonomous(name = "RedQuarryFINAL")
+public class RedQuarryFINAL extends LinearOpMode {
     private DcMotor FR = null;
     private DcMotor FL = null;
     private DcMotor BR = null;
@@ -76,7 +76,7 @@ public class RedQuarry extends LinearOpMode {
         telemetry.addData("Main Program - Position-RunTime",SkystonePos );
         telemetry.update();
 
-        //SkystonePos="left";
+        //SkystonePos="right";
         if ( SkystonePos.equals("right")){
             encoderDrive(.4,24,-24,30);//Turn 90 degrees left
             encoderDrive(.4,1,1,30);//Move forward to left skystone
@@ -88,13 +88,13 @@ public class RedQuarry extends LinearOpMode {
             StoneL.setPosition(1);
             strafeDrive(.2,-8.0,8.0,30);//Coming away from quarry with Stone
             encoderDrive(.6,98,98,30);//Moving toward building site and foundation
-            strafeDrive(.4,10,-10,30);//Strafe towards the foundation
-            StoneL.setPosition(.6); //Drop arm
-            sleep(500);
+            strafeDrive(.4,13,-13,30);//Strafe towards the foundation
+            StoneL.setPosition(.86); //Drop arm
+            sleep(70);
             AutoGrabL.setPosition(0);//drop the stone
             sleep(100);
             StoneL.setPosition(1);//lift the arm
-            sleep(250);
+            sleep(50);
             AutoGrabL.setPosition(.75);//close the grabber
             strafeDrive(.4,-10,10,30);//strafe away from foundation
             encoderDrive(.6,-12,-12,30);//Moving toward building site and foundation| getting ready to grab foundation
@@ -106,18 +106,14 @@ public class RedQuarry extends LinearOpMode {
             splineDrive(.2,.07,18,5,30);
             encoderDrive(.3,20,20,30);
             encoderDrive(.3,27,-27,30);
-            encoderDrive(.4,-25,-25,30);
             FoundationServoL.setPosition(.15);
             FoundationServoR.setPosition(.85);
-            sleep(500);
+            sleep(100);
+            encoderDrive(.4,-25,-25,30);
             strafeDrive(.4,18,-18,30);
             strafeDrive(.4,-28,28,30);
-            encoderDrive(.5,39,39,30);
+            encoderDrive(.5,43,43,30);
         }
-
-
-
-
         else if (SkystonePos.equals("middle")){
             encoderDrive(.4,24,-24,30);//Turn 90 degrees left
             encoderDrive(.4,-7,-7,30);//Move forward to left skystone
@@ -129,13 +125,13 @@ public class RedQuarry extends LinearOpMode {
             StoneL.setPosition(1);
             strafeDrive(.2,-8.0,8.0,30);//Coming away from quarry with Stone
             encoderDrive(.6,106,106,30);//Moving toward building site and foundation
-            strafeDrive(.4,10,-10,30);//Strafe towards the foundation
-            StoneL.setPosition(.6); //Drop arm
-            sleep(500);
+            strafeDrive(.4,13,-13,30);//Strafe towards the foundation
+            StoneL.setPosition(.86); //Drop arm
+            sleep(70);
             AutoGrabL.setPosition(0);//drop the stone
             sleep(100);
             StoneL.setPosition(1);//lift the arm
-            sleep(250);
+            sleep(50);
             AutoGrabL.setPosition(.75);//close the grabber
             strafeDrive(.4,-10,10,30);//strafe away from foundation
             encoderDrive(.6,-12,-12,30);//Moving toward building site and foundation| getting ready to grab foundation
@@ -147,18 +143,14 @@ public class RedQuarry extends LinearOpMode {
             splineDrive(.2,.07,18,5,30);
             encoderDrive(.3,20,20,30);
             encoderDrive(.3,27,-27,30);
-            encoderDrive(.4,-25,-25,30);
             FoundationServoL.setPosition(.15);
             FoundationServoR.setPosition(.85);
-            sleep(500);
+            sleep(100);
+            encoderDrive(.4,-25,-25,30);
             strafeDrive(.4,18,-18,30);
             strafeDrive(.4,-28,28,30);
-            encoderDrive(.5,39,39,30);
+            encoderDrive(.5,43,43,30);
         }
-
-
-
-
         else { //left position
             encoderDrive(.4,24,-24,30);//Turn 90 degrees left
             encoderDrive(.4,-15,-15,30);//Move forward to left skystone
@@ -170,13 +162,13 @@ public class RedQuarry extends LinearOpMode {
             StoneL.setPosition(1);
             strafeDrive(.2,-8.0,8.0,30);//Coming away from quarry with Stone
             encoderDrive(.6,114,114,30);//Moving toward building site and foundation
-            strafeDrive(.4,10,-10,30);//Strafe towards the foundation
-            StoneL.setPosition(.6); //Drop arm
-            sleep(500);
+            strafeDrive(.4,13,-13,30);//Strafe towards the foundation
+            StoneL.setPosition(.86); //Drop arm
+            sleep(70);
             AutoGrabL.setPosition(0);//drop the stone
             sleep(100);
             StoneL.setPosition(1);//lift the arm
-            sleep(250);
+            sleep(50);
             AutoGrabL.setPosition(.75);//close the grabber
             strafeDrive(.4,-10,10,30);//strafe away from foundation
             encoderDrive(.6,-12,-12,30);//Moving toward building site and foundation| getting ready to grab foundation
@@ -188,13 +180,13 @@ public class RedQuarry extends LinearOpMode {
             splineDrive(.2,.07,18,5,30);
             encoderDrive(.3,20,20,30);
             encoderDrive(.3,27,-27,30);
-            encoderDrive(.4,-25,-25,30);
             FoundationServoL.setPosition(.15);
             FoundationServoR.setPosition(.85);
-            sleep(500);
+            sleep(100);
+            encoderDrive(.4,-25,-25,30);
             strafeDrive(.4,18,-18,30);
             strafeDrive(.4,-28,28,30);
-            encoderDrive(.5,39,39,30);
+            encoderDrive(.5,43,43,30);
 
         }
 
