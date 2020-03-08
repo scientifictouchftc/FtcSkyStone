@@ -1,0 +1,814 @@
+package org.firstinspires.ftc.teamcode.Autonomous;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+//import org.firstinspires.ftc.teamcode.EasyOpenCV.CustomSkystoneDetector;
+import com.qualcomm.robotcore.util.Hardware;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.robot.Robot;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+
+@Autonomous(name = "RedQuarryIMU")
+public class RedQuarryIMU extends LinearOpMode {
+    private DcMotor FR = null;
+    private DcMotor FL = null;
+    private DcMotor BR = null;
+    private DcMotor BL = null;
+    private Servo StoneL = null;
+    private Servo StoneR = null;
+    private Servo AutoGrabL = null;
+    private Servo FoundationServoR = null;
+    private Servo FoundationServoL = null;
+    public BNO055IMU imu;
+    Orientation             lastAngles = new Orientation();
+    double                  globalAngle, power = .30, correction;
+    double RobotAngle;
+
+    private ElapsedTime runtime = new ElapsedTime();
+    //private Telemetry telemetry = null;
+    static final double TICKS_PER_REV = 537.6;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 0.892;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (TICKS_PER_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
+
+    @Override
+    public void runOpMode() throws InterruptedException
+    {
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        remapAxes(imu,AxesOrder.XYZ,AxesSigns.NPN);
+        imu.initialize(parameters);
+
+
+
+
+        FL = hardwareMap.dcMotor.get("FL");
+        FR = hardwareMap.dcMotor.get("FR");
+        BR = hardwareMap.dcMotor.get("BR");
+        BL = hardwareMap.dcMotor.get("BL");
+        StoneL = hardwareMap.servo.get("StoneL");
+        StoneR = hardwareMap.servo.get("StoneR");
+        AutoGrabL = hardwareMap.servo.get("AutoGrabL");
+        FoundationServoL = hardwareMap.servo.get("FoundationServoL");
+        FoundationServoR = hardwareMap.servo.get("FoundationServoR");
+
+
+
+
+
+
+
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        FR.setDirection(DcMotor.Direction.REVERSE);
+        BR.setDirection(DcMotor.Direction.REVERSE);
+
+         SkystoneDetectorCV detector = new SkystoneDetectorCV();
+        String SkystonePos ="";
+
+        while (!isStopRequested() && !imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
+
+
+        telemetry.addData("Main Program - Position-Init",SkystonePos );
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.addLine("Ready To Start");
+        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.addLine("Ready To Start");
+        telemetry.update();
+        telemetry.update();
+
+         SkystonePos = detector.getSkystonePos(this.hardwareMap ,this,"RED");
+
+
+
+        // start
+        waitForStart();
+        // correction(.3,0);
+        //start
+        telemetry.addData("Mode", "running");
+        telemetry.update();
+        AutoGrabL.setPosition(0);//open the clamp of grabber
+        StoneL.setPosition(.2);
+        // strafeDrive(.2,-2,2,30);
+        encoderDrive(.5,12,12,30); //move foreward 8 inches for Detection//
+
+
+        FoundationServoL.setPosition(.3); //down
+        FoundationServoR.setPosition(.65);
+
+
+        telemetry.addData("Main Program - Position-RunTime",SkystonePos );
+        telemetry.addData("1 imu heading", lastAngles.firstAngle);
+        telemetry.update();
+
+       // SkystonePos="left";
+        if ( SkystonePos.equals("right")){
+            encoderDrive(.3,24,-24,30);//Turn 90 degrees left
+            // encoderDrive(.5,2,2,30);//Move forward to left skystone
+            sleep(1000);
+            correction(.3,-90);
+            strafeDrive(.3,21,-21,30); //Strafe towards Skystone
+            sleep(1000);
+            correction(.3,-90);
+            StoneL.setPosition(0);
+            sleep(300);
+            AutoGrabL.setPosition(0.3);
+            sleep(500); //pickup Stone
+            StoneL.setPosition(.4);
+            strafeDrive(.4,-9.5,9.5,30);//Coming away from quarry with Stone\
+            sleep(1000);
+            correction(.3,-90);
+            //sleep(2000);
+            encoderDrive(.4,80,80,30);//Moving toward building site and foundation
+            sleep(1000);
+            correction(.3,-90);
+
+
+
+            strafeDrive(.4,15,-15,30);//Strafe towards the foundation
+            StoneL.setPosition(.2); //Drop arm
+            sleep(70);
+            AutoGrabL.setPosition(0);//drop the stone
+            sleep(100);
+            StoneL.setPosition(.4);//lift the arm
+            sleep(50);
+            AutoGrabL.setPosition(0.3);//close the grabber
+            strafeDrive(.4,-3,3,30); // strafe way from foundation
+            encoderDrive(.4,24,-24,30);//turn away from foundation
+            encoderDrive(.6,-7,-7,30);//going to grab foundation
+            FoundationServoL.setPosition(.65); //Grabbing Foundation
+            FoundationServoR.setPosition(.3);
+            sleep(750);
+            encoderDrive(.7,26,26,30);//moving foundation backwards
+            encoderDrive(.5,32,-32,30);//turning foundation against the wall
+            FoundationServoL.setPosition(.3);
+            FoundationServoR.setPosition(.65);
+            sleep(100);
+            encoderDrive(1,-17,-17,30);
+            strafeDrive(.4,-17,17,30);//strafing against netural bridge
+            encoderDrive(.3,45,45,30);//park
+        }
+        else if (SkystonePos.equals("middle")){
+            encoderDrive(.3,24,-24,30);//Turn 90 degrees left
+            encoderDrive(.5,-6,-6,30);//Move forward to left skystone
+            sleep(1000);
+            correction(.3,-90);
+            strafeDrive(.3,21,-21,30); //Strafe towards Skystone
+            sleep(1000);
+            correction(.3,-90);
+            StoneL.setPosition(0);
+            sleep(300);
+            AutoGrabL.setPosition(0.3);
+            sleep(500); //pickup Stone
+            StoneL.setPosition(.4);
+            strafeDrive(.4,-9.5,9.5,30);//Coming away from quarry with Stone\
+            sleep(1000);
+            correction(.3,-90);
+            //sleep(2000);
+            encoderDrive(.4,88,88,30);//Moving toward building site and foundation
+            sleep(1000);
+            correction(.3,90);
+
+
+
+            strafeDrive(.4,15,-15,30);//Strafe towards the foundation
+            StoneL.setPosition(.2); //Drop arm
+            sleep(70);
+            AutoGrabL.setPosition(0);//drop the stone
+            sleep(100);
+            StoneL.setPosition(.4);//lift the arm
+            sleep(50);
+            AutoGrabL.setPosition(0.3);//close the grabber
+            strafeDrive(.4,-3,3,30); // strafe way from foundation
+            encoderDrive(.4,24,-24,30);//turn away from foundation
+            encoderDrive(.6,-7,-7,30);//going to grab foundation
+            FoundationServoL.setPosition(.65); //Grabbing Foundation
+            FoundationServoR.setPosition(.3);
+            sleep(750);
+            encoderDrive(.7,26,26,30);//moving foundation backwards
+            encoderDrive(.5,32,-32,30);//turning foundation against the wall
+            FoundationServoL.setPosition(.3);
+            FoundationServoR.setPosition(.65);
+            sleep(100);
+            encoderDrive(1,-17,-17,30);
+            strafeDrive(.4,-17,17,30);//strafing against netural bridge
+            encoderDrive(.3,45,45,30);//park
+        }
+
+
+
+
+        else { //left position
+            encoderDrive(.3,24,-24,30);//Turn 90 degrees left
+            encoderDrive(.5,-13,-13,30);//Move forward to left skystone
+            sleep(1000);
+            correction(.3,-90);
+            strafeDrive(.3,21,-21,30); //Strafe towards Skystone
+            sleep(1000);
+            correction(.3,-90);
+            StoneL.setPosition(0);
+            sleep(300);
+            AutoGrabL.setPosition(0.3);
+            sleep(500); //pickup Stone
+            StoneL.setPosition(.4);
+            strafeDrive(.4,-9.5,9.5,30);//Coming away from quarry with Stone\
+            sleep(1000);
+            correction(.3,-90);
+            //sleep(2000);
+            encoderDrive(.4,95,95,30);//Moving toward building site and foundation
+            sleep(1000);
+            correction(.3,90);
+
+
+
+            strafeDrive(.4,15,-15,30);//Strafe towards the foundation
+            StoneL.setPosition(.2); //Drop arm
+            sleep(70);
+            AutoGrabL.setPosition(0);//drop the stone
+            sleep(100);
+            StoneL.setPosition(.4);//lift the arm
+            sleep(50);
+            AutoGrabL.setPosition(0.3);//close the grabber
+            strafeDrive(.4,-3,3,30); // strafe way from foundation
+            encoderDrive(.4,24,-24,30);//turn away from foundation
+            encoderDrive(.6,-7,-7,30);//going to grab foundation
+            FoundationServoL.setPosition(.65); //Grabbing Foundation
+            FoundationServoR.setPosition(.3);
+            sleep(750);
+            encoderDrive(.7,26,26,30);//moving foundation backwards
+            encoderDrive(.5,32,-32,30);//turning foundation against the wall
+            FoundationServoL.setPosition(.3);
+            FoundationServoR.setPosition(.65);
+            sleep(100);
+            encoderDrive(1,-17,-17,30);
+            strafeDrive(.4,-17,17,30);//strafing against netural bridge
+            encoderDrive(.3,45,45,30);//park
+
+        }
+
+    }
+    //Encoder Drive and Strafe Drive Methods:
+
+    //Encoder Drive method
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS)
+    {
+
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget= 0;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+
+            newLeftFrontTarget = FL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightFrontTarget = FR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftBackTarget = BL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = BR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            FR.setTargetPosition(newRightFrontTarget);
+            FL.setTargetPosition(newLeftFrontTarget);
+            BR.setTargetPosition(newRightBackTarget);
+            BL.setTargetPosition(newLeftBackTarget);
+
+            // Turn On RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            FR.setPower(Math.abs(speed));
+            FL.setPower(Math.abs(speed));
+            BR.setPower(Math.abs(speed));
+            BL.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 31.0) &&
+                    (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftFrontTarget,  newRightFrontTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
+
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            FR.setPower(0);
+            FL.setPower(0);
+            BR.setPower(0);
+            BL.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+
+
+
+    //spline
+
+    public void splineDrive(double lspeed, double rspeed,
+                            double leftInches, double rightInches,
+                            double timeoutS)
+    {
+
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget= 0;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+
+            newLeftFrontTarget = FL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightFrontTarget = FR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftBackTarget = BL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = BR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            FR.setTargetPosition(newRightFrontTarget);
+            FL.setTargetPosition(newLeftFrontTarget);
+            BR.setTargetPosition(newRightBackTarget);
+            BL.setTargetPosition(newLeftBackTarget);
+
+            // Turn On RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            FR.setPower(Math.abs(rspeed));
+            FL.setPower(Math.abs(lspeed));
+            BR.setPower(Math.abs(rspeed));
+            BL.setPower(Math.abs(lspeed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < 31.0) &&
+                    (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftFrontTarget,  newRightFrontTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d", newLeftBackTarget, newRightBackTarget);
+
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            FR.setPower(0);
+            FL.setPower(0);
+            BR.setPower(0);
+            BL.setPower(0);
+            // Turn off RUN_TO_POSITION
+            FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+    //Strafe Drive Method:
+
+    public void strafeDrive(double speed,
+                            double leftInches, double rightInches,
+                            double timeoutS)
+    {
+
+        int newLeftFrontTarget = 0;
+        int newRightFrontTarget = 0;
+        int newLeftBackTarget = 0;
+        int newRightBackTarget = 0;
+
+        // Ensure that the opmode is still active
+        //if (opModeIsActive()) {
+
+        // Determine new target position, and pass to motor controller
+
+        newLeftFrontTarget = FL.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+        newRightFrontTarget = FR.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+        newLeftBackTarget = BL.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+        newRightBackTarget = BR.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+
+        FR.setTargetPosition(newRightFrontTarget);
+        FL.setTargetPosition(-newLeftFrontTarget);
+        BR.setTargetPosition(newRightBackTarget);
+        BL.setTargetPosition(-newLeftBackTarget);
+
+        // Turn On RUN_TO_POSITION
+        FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // reset the timeout time and start motion.
+        runtime.reset();
+        FR.setPower(Math.abs(speed));
+        FL.setPower(Math.abs(speed));
+        BR.setPower(Math.abs(speed));
+        BL.setPower(Math.abs(speed));
+
+        // keep looping while we are still active, and there is time left, and both motors are running.
+        // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+        // its target position, the motion will stop.  This is "safer" in the event that the robot will
+        // always end the motion as soon as possible.
+        // However, if you require that BOTH motors have finished their moves before the robot continues
+        // onto the next step, use (isBusy() || isBusy()) in the loop test.
+        while (opModeIsActive() &&
+                (runtime.seconds() < 31.0) &&
+                (FR.isBusy() && FL.isBusy() && (BR.isBusy() && (BL.isBusy())))) {
+
+            // Display it for the driver.
+
+            telemetry.update();
+        }
+
+        // Stop all motion;
+        FR.setPower(0);
+        FL.setPower(0);
+        BR.setPower(0);
+        BL.setPower(0);
+
+        // Turn off RUN_TO_POSITION
+        FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+
+
+
+    public void correction(double speed, double angle){
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        getAngle();
+        RobotAngle = lastAngles.firstAngle;
+        double delta = angle - RobotAngle;
+
+        if(delta > 0.0){
+            telemetry.addData("correction Righturn", delta);
+            telemetry.update();
+
+            RightTurn(speed,angle);
+
+        }else{
+            telemetry.addData("correction Leftturn", delta);
+            telemetry.update();
+
+            LeftTurn(speed,angle);
+        }
+
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void LeftTurn(double speed, double angle){
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        getAngle();
+        telemetry.addData("Left Turn Before While current Angle", RobotAngle);
+        telemetry.addData("Left Turn Before While Target Angle", angle);
+
+        while(RobotAngle >= angle) {
+            //  -90
+            getAngle();
+            speed =0.1;
+            FL.setPower(speed);
+            FR.setPower(-speed);
+            BL.setPower(speed);
+            BR.setPower(-speed);
+
+            RobotAngle = lastAngles.firstAngle;
+            telemetry.addData("Left Turn Running current Angle", RobotAngle);
+            telemetry.addData("Left Turn Running Target Angle", angle);
+            telemetry.addData("1 turn imu heading", lastAngles.firstAngle);
+            //telemetry.addData("2 global heading", globalAngle);
+            //telemetry.addData("3 correction", correction);
+            telemetry.update();
+            //sleep(1000);
+            getAngle();
+
+        }
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+
+
+        //fineTurnR(speed,angle);
+
+    }
+
+    public void RightTurn(double speed, double angle){
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        while(RobotAngle >= angle) {
+            //correction = checkDirection();
+            getAngle();
+
+            FL.setPower(speed);
+            FR.setPower(-speed);
+            BL.setPower(speed);
+            BR.setPower(-speed);
+
+
+
+            RobotAngle = lastAngles.firstAngle;
+            telemetry.addData("Righturn Current Angle", RobotAngle);
+            telemetry.addData("Rightturn Target Angle", angle);
+            telemetry.addData("1 turn imu heading", lastAngles.firstAngle);
+            //telemetry.addData("2 global heading", globalAngle);
+            //telemetry.addData("3 correction", correction);
+            telemetry.update();
+        }
+
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+
+    public void fineTurnL(double speed, double angle){
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        while(RobotAngle >= angle) {
+            correction = checkDirection();
+
+
+            FL.setPower(-speed/2);
+            FR.setPower(speed/2);
+            BL.setPower(-speed/2);
+            BR.setPower(speed/2);
+
+
+
+            RobotAngle = lastAngles.firstAngle;
+            telemetry.addData("RobotAngle Fine Turn", RobotAngle);
+            telemetry.addData("1 turn imu heading", lastAngles.firstAngle);
+            telemetry.addData("2 global heading", globalAngle);
+            telemetry.addData("3 correction", correction);
+            telemetry.update();
+        }
+
+
+
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+    public void fineTurnR(double speed, double angle){
+
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addData("Fine TurnR Before While current Angle", RobotAngle);
+        telemetry.addData("Fine TurnR Before While Target Angle", angle);
+        sleep(2000);
+        while(RobotAngle <= angle) {
+            getAngle();
+            FL.setPower(-speed/2);
+            FR.setPower(speed/2);
+            BL.setPower(-speed/2);
+            BR.setPower(speed/2);
+
+            RobotAngle = lastAngles.firstAngle;
+            telemetry.addData("Fine TurnR current", RobotAngle);
+            telemetry.addData("Fine TurnR Target", angle);
+            telemetry.addData("2 global heading", globalAngle);
+            // telemetry.addData("3 correction", correction);
+            telemetry.update();
+            getAngle();
+        }
+        getAngle();
+
+        telemetry.addData("AFTET Fine TurnR current Angle", RobotAngle);
+
+        sleep(1000);
+
+
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+
+
+
+
+    //imu tings
+
+    private double getAngle()
+    {
+        // We experimentally determined the Z axis is the axis we want to use for heading angle.
+        // We have to process the angle because the imu works in euler angles so the Z axis is
+        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
+        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
+
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
+
+        lastAngles = angles;
+
+        return globalAngle;
+    }
+
+
+
+
+    private double checkDirection()
+    {
+        // The gain value determines how sensitive the correction is to direction changes.
+        // You will have to experiment with your robot to get small smooth direction changes
+        // to stay on a straight line.
+        double correction, angle, gain = .10;
+
+        angle = getAngle();
+
+        if (angle == 0)
+            correction = 0;             // no adjustment.
+        else
+            correction = -angle;        // reverse sign of angle for correction.
+
+        correction = correction * gain;
+
+        return correction;
+    }
+
+
+    public static void remapAxes(BNO055IMU imu, AxesOrder order, AxesSigns signs) {
+        try {
+            // the indices correspond with the 2-bit encodings specified in the datasheet
+            int[] indices = order.indices();
+            int axisMapConfig = 0;
+            axisMapConfig |= (indices[0] << 4);
+            axisMapConfig |= (indices[1] << 2);
+            axisMapConfig |= (indices[2] << 0);
+
+            // the BNO055 driver flips the first orientation vector so we also flip here
+            int axisMapSign = signs.bVal ^ (0b100 >> indices[0]);
+
+            // Enter CONFIG mode
+            imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
+
+            Thread.sleep(100);
+
+            // Write the AXIS_MAP_CONFIG register
+            imu.write8(BNO055IMU.Register.AXIS_MAP_CONFIG, axisMapConfig & 0x3F);
+
+            // Write the AXIS_MAP_SIGN register
+            imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN, axisMapSign & 0x07);
+
+            // Switch back to the previous mode
+            imu.write8(BNO055IMU.Register.OPR_MODE, imu.getParameters().mode.bVal & 0x0F);
+
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public enum AxesSigns {
+        PPP(0b000),
+        PPN(0b001),
+        PNP(0b010),
+        PNN(0b011),
+        NPP(0b100),
+        NPN(0b101),
+        NNP(0b110),
+        NNN(0b111);
+
+
+        public final int bVal;
+        AxesSigns(int bVal){
+            this.bVal = bVal;
+        }
+
+
+
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------//
+
+}
