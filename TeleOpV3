@@ -1,0 +1,99 @@
+package org.firstinspires.ftc.teamcode.drive.opmode;
+
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+
+
+
+@TeleOp(name = "TeleUL")
+public class TeleUL extends LinearOpMode {
+    public float x, y, z, w, pwr;
+    private DcMotor BR;
+    private DcMotor BL;
+    private DcMotor FL;
+    private DcMotor FR;
+    private DcMotor swodright;
+    private DcMotor swodleft;
+    private DcMotor intake;
+    private DcMotor transition;
+    private Servo wobblegoalright;
+    private Servo wobblegoalleft;
+
+
+    public  boolean bPressed= false;
+    public boolean aPressed= false;
+
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        BR = hardwareMap.dcMotor.get("BR");
+        BL = hardwareMap.dcMotor.get("BL");
+        FL = hardwareMap.dcMotor.get("FL");
+        FR = hardwareMap.dcMotor.get("FR");
+        swodright = hardwareMap.dcMotor.get("swodright");
+        swodleft = hardwareMap.dcMotor.get("swodleft");
+        transition = hardwareMap.dcMotor.get("transition");
+        intake = hardwareMap.dcMotor.get("intake");
+        wobblegoalright = hardwareMap.servo.get("wobblegoalright");
+        wobblegoalleft = hardwareMap.servo.get("wobblegoalleft");
+
+        FR.setDirection(DcMotor.Direction.REVERSE);
+        BR.setDirection(DcMotor.Direction.REVERSE);
+        swodleft.setDirection(DcMotor.Direction.REVERSE);
+
+        FR.setPower(Range.clip(pwr - x + z, -1, 1));
+        BL.setPower(Range.clip(pwr - x - z, -1, 1));
+        FL.setPower(Range.clip(pwr + x - z, -1, 1));
+        BR.setPower(Range.clip(pwr + x + z, -1, 1));
+
+        waitForStart();
+        while (opModeIsActive()) {
+           // moving the robot forward and backward
+           // double intakepower=gamepad1.
+            float forwardBackAxis = gamepad2.left_stick_y; //moving forward
+            float leftRightAxis = -gamepad2.left_stick_x; // strafing
+            float spinAxis = gamepad2.right_stick_x; // turning
+
+            //math tings
+            float FRpower = forwardBackAxis + leftRightAxis + spinAxis;
+            float FLpower = forwardBackAxis + leftRightAxis - spinAxis;
+            float BRpower = forwardBackAxis - leftRightAxis + spinAxis;
+            float BLpower = forwardBackAxis - leftRightAxis - spinAxis;
+
+            FR.setPower(-FRpower);
+            FL.setPower(-FLpower);
+            BR.setPower(-BRpower);
+            BL.setPower(-BLpower);
+
+            if(gamepad1.a){
+                wobblegoalleft.setPosition(0.3);//will change later
+                wobblegoalright.setPosition(0.3);//will change later
+            }
+
+            double int_y= gamepad1.left_stick_y;
+            intake.setPower(int_y);//will change later
+
+            if(gamepad1.b){
+                bPressed= !bPressed;
+                while(gamepad1.b);
+            }
+            if(bPressed){
+                //will have to  change later after testing
+                wobblegoalright.setPosition(0.7);
+                wobblegoalright.setPosition(0.2);
+            }
+
+            double out_y= gamepad1.right_stick_y;
+            swodright.setPower(out_y);
+            swodleft.setPower(out_y);//will change later
+            transition.setPower(out_y);//will have to change later after testing if different speeds are required
+
+        }
+    }
+}
